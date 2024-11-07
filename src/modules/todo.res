@@ -1,14 +1,44 @@
 module Todo = {
-  type todo = {id: int, title: string}
+  type todo = {id: int, title: string, completed: bool}
   type state = {todos: array<todo>}
   type todoId = int
-  type action = AddTodo(todo) | RemoveTodo(todoId) | Reset
+  type action = AddTodo(todo) | RemoveTodo(todoId) | MarkCompleteTodo(int, bool) | Reset
+
   let state = {todos: []}
+
+  let checkTodo = todo => {...todo, completed: true}
+  let getIndex = todoId => (todos: array<todo>) => {
+    todos->Array.findIndex(todo => todo.id === todoId)
+  }
+  let getTodo = todoId => (todos: array<todo>) => {
+    todos->Array.at(getIndex(todoId)(todos))
+  }
+
+  let appendTodos = (todo: todo) => (todos: array<todo>) => {todos: todos->Array.concat([todo])}
+  let removeTodos = (todoId: int) => (todos: array<todo>) => {
+    todos: todos->Array.filter(t => t.id !== todoId),
+  }
+  let markCompleteTodo = (~todoId: int, ~completed: bool) => (todos: array<todo>) => {
+    let todoIndex = Array.findIndex(todos, todo => todo.id === todoId)
+    let todo = todos[todoIndex]
+
+    switch todo {
+    | Some(todo) => {
+        let updatedTodo = {...todo, completed: !completed}
+        let newTodos = todos->Array.slice(~start=0, ~end=todos->Array.length)
+        newTodos->Array.set(todoIndex, updatedTodo)
+
+        {todos: newTodos}
+      }
+    | None => {todos: todos}
+    }
+  }
 
   let reducerFn = (state, action) => {
     switch action {
-    | AddTodo(todo) => {todos: state.todos->Array.concat([todo])}
-    | RemoveTodo(todoId) => {todos: state.todos->Array.filter(v => v.id !== todoId)}
+    | AddTodo(todo) => appendTodos(todo)(state.todos)
+    | RemoveTodo(todoId) => removeTodos(todoId)(state.todos)
+    | MarkCompleteTodo(todoId, completed) => markCompleteTodo(~todoId, ~completed)(state.todos)
     | Reset => {todos: []}
     }
   }

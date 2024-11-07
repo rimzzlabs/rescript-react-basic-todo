@@ -8,8 +8,11 @@ let make = (~addTodo: addTodo) => {
 
   let onClick = (val: string) => {
     (_e: JsxEventU.Mouse.t) => {
-      addTodo(val)
-      setValue(_v => "")
+      let isNotEmptyValue = val->String.replaceRegExp(%re("/\s+/g"), "")->String.length > 0
+      if isNotEmptyValue {
+        addTodo(val)
+        setValue(_v => "")
+      }
     }
   }
 
