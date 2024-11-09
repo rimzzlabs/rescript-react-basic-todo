@@ -6,18 +6,11 @@ module Todo = {
 
   let state = {todos: []}
 
-  let checkTodo = todo => {...todo, completed: true}
-  let getIndex = todoId => (todos: array<todo>) => {
-    todos->Array.findIndex(todo => todo.id === todoId)
-  }
-  let getTodo = todoId => (todos: array<todo>) => {
-    todos->Array.at(getIndex(todoId)(todos))
-  }
-
   let appendTodos = (todo: todo) => (todos: array<todo>) => {todos: todos->Array.concat([todo])}
   let removeTodos = (todoId: int) => (todos: array<todo>) => {
     todos: todos->Array.filter(t => t.id !== todoId),
   }
+
   let markCompleteTodo = (~todoId: int, ~completed: bool) => (todos: array<todo>) => {
     let todoIndex = Array.findIndex(todos, todo => todo.id === todoId)
     let todo = todos[todoIndex]
@@ -32,6 +25,10 @@ module Todo = {
       }
     | None => {todos: todos}
     }
+  }
+
+  let isValidTitle = (val: string) => {
+    val->String.replaceRegExp(%re("/\s+/g"), "")->String.length > 0
   }
 
   let reducerFn = (state, action) => {

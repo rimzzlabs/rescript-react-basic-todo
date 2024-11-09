@@ -18,9 +18,8 @@ let make = (
           ->String.concat(")")
           ->React.string}
         </h2>
-        {Array.mapWithIndex(todos, (todo, i) => {
+        {Array.map(todos, todo => {
           <TodoListItem
-            n={i}
             id={todo.id}
             key={todo.id->Int.toString}
             title={todo.title}

@@ -6,13 +6,32 @@ let make = (~addTodo: addTodo) => {
   let id = React.useId()
   let (value, setValue) = React.useState(() => "")
 
-  let onClick = (val: string) => {
-    (_e: JsxEventU.Mouse.t) => {
-      let isNotEmptyValue = val->String.replaceRegExp(%re("/\s+/g"), "")->String.length > 0
-      if isNotEmptyValue {
-        addTodo(val)
+  let addValidTodo = (title: string) => {
+    let isValidTitle = Todo.Todo.isValidTitle(title)
+    switch isValidTitle {
+    | true => {
+        addTodo(title)
         setValue(_v => "")
       }
+    | false => ()
+    }
+  }
+
+  let onClick = (title: string) => {
+    (_e: JsxEventU.Mouse.t) => addValidTodo(title)
+  }
+  let onKeyDown = (e: JsxEvent.Keyboard.t) => {
+    let target = JsxEvent.Keyboard.target(e)
+    let key = JsxEvent.Keyboard.key(e)
+    let value = target["value"]
+
+    switch key === "Enter" {
+    | true =>
+      switch value->Type.typeof {
+      | #string => addValidTodo(value)
+      | _ => ()
+      }
+    | false => ()
     }
   }
 
@@ -23,17 +42,8 @@ let make = (~addTodo: addTodo) => {
         id={id}
         name={id}
         value={value}
+        onKeyDown={onKeyDown}
         placeholder="write something for later"
-        onKeyDown={(ev: JsxEvent.Keyboard.t) => {
-          let target = JsxEvent.Keyboard.target(ev)
-          let key = JsxEvent.Keyboard.key(ev)
-          let value: string = target["value"]
-
-          if key === "Enter" {
-            addTodo(value)
-            setValue(_v => "")
-          }
-        }}
         onChange={(ev: JsxEvent.Form.t) => {
           let target = JsxEvent.Form.target(ev)
           let value: string = target["value"]

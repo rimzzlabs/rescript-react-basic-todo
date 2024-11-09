@@ -7,7 +7,6 @@ module Window = {
 let make = (
   ~id: int,
   ~title: string,
-  ~n: int,
   ~completed: bool,
   ~removeTodo: int => unit,
   ~completeTodo: (int, bool) => unit,
@@ -19,24 +18,17 @@ let make = (
   | false => "Complete"
   }
 
-  let onClickRemove = int => _ => {
-    let text = "Are you sure you want to remove this item?"
-    let sure = Window.confirm(text)
-    if sure {
-      removeTodo(int)
-    }
+  let label = switch completed {
+  | true => <s> {title->React.string} </s>
+  | false => title->React.string
   }
 
-  <div className="rounded border mb-4 last-of-type:mb-0">
-    <div className="py-6 px-4 flex items-start gap-x-2">
-      <div className="flex-1">
-        <p> {"No "->String.concat((n + 1)->Int.toString)->React.string} </p>
-        <p className="font-medium"> {title->React.string} </p>
-      </div>
-      <div className="shrink-0 inline-flex items-center gap-x-1">
-        <label htmlFor={checkId} className="text-sm font-medium text-stone-500">
-          {checkLabel->React.string}
-        </label>
+  let onClickRemove = int => _ => removeTodo(int)
+
+  <div className="rounded border mb-2 last-of-type:mb-0">
+    <div className="py-3 px-4 flex items-center gap-x-2">
+      <div className="flex mr-auto flex-row-reverse items-center gap-x-2">
+        <label htmlFor={checkId} className="text-sm font-medium text-stone-800"> {label} </label>
         <input
           id={checkId}
           type_="checkbox"
@@ -44,11 +36,9 @@ let make = (
           checked={completed}
         />
       </div>
-    </div>
-    <div className="pb-4 px-4 flex justify-end">
       <button
         onClick={onClickRemove(id)}
-        className="inline-flex items-center justify-center h-10 px-4 rounded bg-red-600 text-stone-50 hover:bg-red-400 transition">
+        className="inline-flex text-sm font-medium items-center justify-center h-7 px-4 rounded bg-red-600 text-stone-50 hover:bg-red-400 transition">
         {"Delete"->React.string}
       </button>
     </div>
